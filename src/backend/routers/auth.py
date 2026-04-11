@@ -37,3 +37,21 @@ def register_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
 
     # 5. Return the user (FastAPI automatically filters this through schemas.UserResponse)
     return new_user
+
+@router.post("/login", response_model=schemas.Token)
+def login_user(user_credentials: schemas.UserLogin, db: Session = Depends(get_db)):
+
+    user = db.query(models.User).filter(models.User.email == user_credentials.email).first()
+    
+    # check if user exists AND password is correct
+    if not user or not security.verify_password(user_credentials.password, user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid email or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    # gen JWT to embed user ID inside token payload
+    access_token = security.create_access_token(data={"user_id": user.id})
+
+    return {"access_token": access_token, "token_type": "bearer"}
