@@ -1,0 +1,35 @@
+name: MzansiBuilds CI Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  backend-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.10"
+
+    - name: Install Backend Dependencies
+      run: |
+        cd src/backend
+        python -m pip install --upgrade pip
+        # We install the core packages directly for the CI runner
+        pip install fastapi uvicorn sqlalchemy psycopg2-binary "pydantic[email]" bcrypt python-jose python-dotenv httpx pytest
+
+    - name: Run Pytest
+      # dummy secret key so the security router does not crash during testing
+      env:
+        JWT_SECRET_KEY: "ci-cd-dummy-secret-key-for-testing"
+      run: |
+        cd src/backend
+        pytest

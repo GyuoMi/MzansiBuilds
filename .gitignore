@@ -1,2 +1,3 @@
 src/backend/.backvenv/
 src/backend/.env
+src/frontend/.env
