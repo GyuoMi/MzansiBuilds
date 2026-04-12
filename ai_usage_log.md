@@ -1,8 +1,8 @@
 # AI Usage Log: MzansiBuilds
 
-**Candidate:** Darshan Singh \
-**Project:** Derivco Code Skills Challenge \ 
-**Date:** April 2026 \
+**Candidate:** Darshan Singh\
+**Project:** Derivco Code Skills Challenge\
+**Date:** April 2026
 
 ## 1. AI Tools Utilised
 * **Primary Assistant:** Google Gemini (v3.1 Pro)
