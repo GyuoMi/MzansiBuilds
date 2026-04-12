@@ -24,7 +24,7 @@ jobs:
         cd src/backend
         python -m pip install --upgrade pip
         # We install the core packages directly for the CI runner
-        pip install fastapi uvicorn sqlalchemy psycopg2-binary "pydantic[email]" bcrypt python-jose python-dotenv httpx pytest
+        pip install -r requirements.txt
 
     - name: Run Pytest
       # dummy secret key so the security router does not crash during testing
