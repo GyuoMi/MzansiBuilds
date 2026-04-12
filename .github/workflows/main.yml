@@ -7,15 +7,31 @@ on:
     branches: [ "main" ]
 
 jobs:
-  backend-tests:
+  test:
     runs-on: ubuntu-latest
 
-    steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v4
+    # 1. Spin up a temporary PostgreSQL database for the tests
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpassword
+          POSTGRES_DB: mzansidb
+        ports:
+          - 5432:5432
+        # Wait until the database is fully ready before running the tests
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
-    - name: Set up Python 3.10
-      uses: actions/setup-python@v5
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
       with:
         python-version: "3.10"
 
@@ -23,14 +39,14 @@ jobs:
       run: |
         cd src/backend
         python -m pip install --upgrade pip
-        # We install the core packages directly for the CI runner
         pip install -r requirements.txt
 
     - name: Run Pytest
-      # dummy secret key so the security router does not crash during testing
       env:
         JWT_SECRET_KEY: "ci-cd-dummy-secret-key-for-testing"
         PYTHONPATH: "."
+      # dummy secret key so the security router does not crash during testing
+        DATABASE_URL: "postgresql://testuser:testpassword@localhost:5432/mzansidb"
       run: |
         cd src/backend
         python -m pytest
