@@ -1,13 +1,22 @@
+import os
 from sqlalchemy import create_engine
+from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import sessionmaker
-from models import Base
+from dotenv import load_dotenv
 
-SQLALCHEMY_DATABASE_URL = "postgresql://postgres:postgres@localhost/mzansibuilds"
+load_dotenv()
+
+# should now read the Github Actions variable
+SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL")
+
+if not SQLALCHEMY_DATABASE_URL:
+    raise ValueError("DATABASE_URL environment variable is not set")
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# Dependency to get the database session
+Base = declarative_base()
+
 def get_db():
     db = SessionLocal()
     try:
