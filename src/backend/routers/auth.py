@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 import models, schemas, security
 from database import get_db
@@ -35,16 +36,19 @@ def register_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_user) # Retrieves the newly generated ID and created_at timestamp
 
-    # 5. Return the user (FastAPI automatically filters this through schemas.UserResponse)
+    # return the user (FastAPI automatically filters this through schemas.UserResponse)
     return new_user
 
 @router.post("/login", response_model=schemas.Token)
-def login_user(user_credentials: schemas.UserLogin, db: Session = Depends(get_db)):
-
-    user = db.query(models.User).filter(models.User.email == user_credentials.email).first()
+def login_user(
+    form_data: OAuth2PasswordRequestForm = Depends(), 
+    db: Session = Depends(get_db)
+):
+    # query via email but the OAuth2 standard names the form as 'username'
+    user = db.query(models.User).filter(models.User.email == form_data.username).first()
     
     # check if user exists AND password is correct
-    if not user or not security.verify_password(user_credentials.password, user.hashed_password):
+    if not user or not security.verify_password(form_data.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password",
