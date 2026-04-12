@@ -30,6 +30,7 @@ jobs:
       # dummy secret key so the security router does not crash during testing
       env:
         JWT_SECRET_KEY: "ci-cd-dummy-secret-key-for-testing"
+        PYTHONPATH: "."
       run: |
         cd src/backend
-        pytest
+        python -m pytest
